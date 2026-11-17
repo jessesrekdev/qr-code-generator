@@ -96,3 +96,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .docs-code .syntax-number{color:#f7b267}
 .docs-code .syntax-tag{color:#82aaff}
 .docs-code .syntax-plain{color:#e5e7eb}
+
+/* iPhone Safari: extend the page background into the browser safe area. */
+html{min-height:100%;background:var(--bg)}
+body,#root{min-height:100%;background:var(--bg)}
+.app-shell{min-height:100vh;min-height:100dvh;background:var(--bg)}
+@supports (padding-bottom:env(safe-area-inset-bottom)){
+ body{padding-bottom:env(safe-area-inset-bottom,0px)}
+}
