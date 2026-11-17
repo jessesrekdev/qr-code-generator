@@ -1,5 +1,5 @@
 {
-  "name": "jesse-qr-studio",
+  "name": "open-qr-studio",
   "version": "3.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,10 @@
     "qr-code-styling": "^1.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.0"
+    "react-router-dom": "^7.1.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.34.5",
+    "jpeg-js": "^0.4.4"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
