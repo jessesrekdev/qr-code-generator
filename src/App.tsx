@@ -19,7 +19,7 @@ function Preview({data,style,size=300}:{data:string;style:Style;size?:number}){
 }
 async function downloadQR(data:string,style:Style,extension:'png'|'svg'|'jpeg'|'webp'){
  if(!data.trim())throw new Error('Enter QR code content first');
- const qr=new QRCodeStyling({width:1200,height:1200,type:'canvas',data,margin:48,image:style.logo||undefined,qrOptions:{errorCorrectionLevel:'H'},imageOptions:{imageSize:.25,margin:16,hideBackgroundDots:true,crossOrigin:'anonymous'},dotsOptions:{type:style.dots,color:style.foreground,...(style.gradient?{gradient:{type:'linear',rotation:0,colorStops:[{offset:0,color:style.foreground},{offset:1,color:style.second}]}}:{})},cornersSquareOptions:{type:style.corners,color:style.foreground},backgroundOptions:{color:style.background}});
+ const qr=new QRCodeStyling({width:1200,height:1200,type:extension==='svg'?'svg':'canvas',data,margin:48,image:style.logo||undefined,qrOptions:{errorCorrectionLevel:'H'},imageOptions:{imageSize:.25,margin:16,hideBackgroundDots:true,crossOrigin:'anonymous'},dotsOptions:{type:style.dots,color:style.foreground,...(style.gradient?{gradient:{type:'linear',rotation:0,colorStops:[{offset:0,color:style.foreground},{offset:1,color:style.second}]}}:{})},cornersSquareOptions:{type:style.corners,color:style.foreground},backgroundOptions:{color:style.background}});
  // Generate the actual file first rather than calling the library's browser download helper.
  const raw=await qr.getRawData(extension);
  if(!raw)throw new Error('QR export could not be generated');
@@ -81,7 +81,32 @@ function App(){
  const flash=(message:string)=>{setNotice(message);window.setTimeout(()=>setNotice(''),3200)};
  const save=()=>{if(!valid)return flash('Enter content before saving');const title=name.trim()||kindLabels[kind];const nextFields={...fields};const nextStyle={...style};if(editingId){setSaved(p=>p.map(s=>s.id===editingId?{...s,name:title,kind,data,fields:nextFields,style:nextStyle,updated:Date.now()}:s));setOriginal(JSON.stringify({kind,fields:nextFields,style:nextStyle,name:title}));setName(title);flash('Project updated successfully')}else{const id=crypto.randomUUID();setSaved(p=>[{id,name:title,kind,data,fields:nextFields,style:nextStyle,created:Date.now()},...p]);setEditingId(id);setName(title);setOriginal(JSON.stringify({kind,fields:nextFields,style:nextStyle,name:title}));flash('Project saved to your library')}};
  const exportFile=async(content:string,appearance:Style,format:'png'|'svg')=>{try{await downloadQR(content,appearance,format);flash(format.toUpperCase()+' export ready')}catch(error){console.error('QR export failed',error);flash('Download failed. Please try again.')}};
- const upload=(file?:File)=>{if(!file)return;if(file.size>1_500_000)return flash('Please choose an image under 1.5 MB');if(!file.type.startsWith('image/'))return flash('Please choose an image file');const reader=new FileReader();reader.onload=()=>setStyle(p=>({...p,logo:String(reader.result)}));reader.readAsDataURL(file)};
+ const upload=(file?:File)=>{
+  if(!file)return;
+  if(file.size>1_500_000)return flash('Please choose an image under 1.5 MB');
+  if(!file.type.startsWith('image/'))return flash('Please choose an image file');
+  // Normalize uploaded logos to PNG so the QR renderer can embed them
+  // consistently in SVG previews and downloaded SVG/PNG/JPG files.
+  const reader=new FileReader();
+  reader.onerror=()=>flash('Could not read the logo image');
+  reader.onload=()=>{
+   const img=new Image();
+   img.onerror=()=>flash('This image format is not supported. Try PNG or JPG.');
+   img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    const max=512,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+    canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+    const ctx=canvas.getContext('2d');
+    if(!ctx)return flash('Could not process the logo');
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    try{setStyle(p=>({...p,logo:canvas.toDataURL('image/png')}));flash('Center logo added')}
+    catch{flash('Could not process the logo. Try a PNG image.')}
+   };
+   img.src=String(reader.result);
+  };
+  reader.readAsDataURL(file);
+ };
  const field=(label:string,key:string,placeholder:string,area=false)=><label className="field"><span>{label}</span>{area?<textarea value={fields[key]||''} placeholder={placeholder} onChange={e=>setField(key,e.target.value)} rows={4}/>:<input value={fields[key]||''} placeholder={placeholder} onChange={e=>setField(key,e.target.value)}/>}</label>;
  const editor=()=> <div className="studio-grid">{editingId&&<div className="editing-banner"><div><strong>Editing saved project</strong><span>{name}</span></div><button className="secondary" onClick={()=>navigate('/library')}>Back to library</button></div>}<div className="studio-controls">
  <section className="panel"><div className="section-title"><span className="step">01</span><div><h2>Choose your content</h2><p>Enter the information you want to share.</p></div></div>
