@@ -14,7 +14,7 @@ A modern, responsive QR code generator and public QR image API, built with React
 - PNG and SVG downloads
 - Saved projects in a browser-local library, including reopening and editing
 - Dark/light mode and responsive mobile/desktop interface
-- Public GET API that produces an SVG QR image without an API key
+- Public GET API that produces SVG, PNG or JPG QR images without an API key
 
 ## Use the web app
 
@@ -22,7 +22,7 @@ Visit **https://open-qr-studio.netlify.app**, open **Studio**, choose a content 
 
 ## QR image API
 
-Send a GET request to `/create` with a required `q` query parameter. The response is **SVG image data** (`image/svg+xml`), not JSON or an HTML page.
+Send a GET request to `/create` with a required `q` query parameter. The response is an **image**, not JSON or HTML. By default it returns SVG (`image/svg+xml`). Set `format=png` for PNG (`image/png`) or `format=jpg` for JPEG (`image/jpeg`). The aliases `format=jpeg`, `type=png`, and bare flags `_png`, `_jpg`, `_svg` are also supported.
 
 ### Quick start
 
@@ -44,6 +44,7 @@ https://open-qr-studio.netlify.app/create?q=Hello%20World&foreground=%231463e8&b
 
 | Parameter | Required | Default | Description |
 | --- | --- | --- | --- |
+| `format` or `type` | No | `svg` | `svg`, `png`, `jpg` (or `jpeg`); `_svg`, `_png`, `_jpg` flags also work |
 | `q` | Yes | — | Text or URL to encode; up to 2,200 UTF-8 bytes |
 | `foreground` or `fg` | No | `#151a35` | Foreground hex color |
 | `background` or `bg` | No | `#ffffff` | Background hex color |
@@ -54,6 +55,16 @@ https://open-qr-studio.netlify.app/create?q=Hello%20World&foreground=%231463e8&b
 | `second` | No | `#1463e8` | Second gradient color when enabled |
 
 Colors accept `#RGB` or `#RRGGBB`.
+
+### Choose the image format
+
+```text
+https://open-qr-studio.netlify.app/create?q=Hello&format=svg
+https://open-qr-studio.netlify.app/create?q=Hello&format=png
+https://open-qr-studio.netlify.app/create?q=Hello&format=jpg
+```
+
+You can also append `&_png`, `&_jpg`, or `&_svg` to the URL. Without a format option, the API returns SVG. JPG uses an opaque background; PNG and SVG preserve the requested design.
 
 ### Code examples
 
@@ -112,7 +123,7 @@ curl --get 'https://open-qr-studio.netlify.app/create' \
 
 ### Responses and limits
 
-- `200 OK` — SVG image (`Content-Type: image/svg+xml`).
+- `200 OK` — SVG, PNG or JPEG image with the corresponding `Content-Type`.
 - `400 Bad Request` — missing `q`, invalid styling parameter, or unencodable content.
 - `413 Content Too Large` — QR content exceeds 2,200 UTF-8 bytes.
 - `405 Method Not Allowed` — method other than GET or HEAD.
