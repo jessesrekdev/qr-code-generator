@@ -51,6 +51,8 @@ https://open-qr-studio.pages.dev/create?q=Hello%20World&foreground=%231463e8&bac
 | `dots` | No | `rounded` | `square`, `rounded` or `dots` |
 | `size` | No | `320` | SVG width/height in pixels, integer 96–1200 |
 | `margin` | No | `4` | Quiet-zone width in QR modules, integer 0–12 |
+| `logo` or `image` | No | — | Public HTTPS URL of a center logo image (PNG, JPG, WebP or GIF, maximum 1 MB) |
+| `logoSize` or `imageSize` | No | `25` | Logo width as a percentage of the QR image, integer 10–30; rounded corners and white backing |
 | `gradient` | No | `false` | Set to `true` to enable a gradient |
 | `second` | No | `#1463e8` | Second gradient color when enabled |
 
@@ -65,6 +67,16 @@ https://open-qr-studio.pages.dev/create?q=Hello&format=jpg
 ```
 
 You can also append `&_png`, `&_jpg`, or `&_svg` to the URL. Without a format option, the API returns SVG. JPG uses an opaque background; PNG and SVG preserve the requested design.
+
+### Center logo from an image URL
+
+Use a public, directly accessible HTTPS image URL; no upload or API key is needed. URL-encode the entire image URL in the `logo` parameter. The logo is centered with rounded corners and a white backing. Adjust its size with `logoSize` (10–30, default 25).
+
+```text
+https://open-qr-studio.pages.dev/create?q=https%3A%2F%2Fexample.com&format=svg&logo=https%3A%2F%2Fexample.com%2Flogo.png&logoSize=20
+```
+
+Replace the example image URL with an actual public image URL. PNG and JPG logos work with SVG, PNG and JPG QR output. WebP and GIF logos are currently supported only for SVG QR output on Cloudflare. SVG logos are not accepted. The image server must allow direct retrieval; private, inaccessible, redirected or oversized images are rejected. Avoid sensitive URLs and test scanning after adding a logo.
 
 ### Code examples
 
