@@ -155,3 +155,15 @@ Studio QR generation runs in the browser. Library designs are stored in `localSt
 ## Tech stack
 
 React 19 · TypeScript · Vite · React Router · Lucide React · qr-code-styling · qrcode · Netlify Functions
+
+## Cloudflare Pages deployment
+
+Cloudflare Pages project: https://open-qr-studio.pages.dev
+
+- GitHub repository: `jessesrekdev/qr-code-generator`
+- Production branch: `feature/react-qr-studio` (`main` remains the backup)
+- Build command: `npm run build`
+- Build output: `dist`
+- Git pushes to the production branch trigger builds.
+
+**API migration note:** The existing `/create` endpoint is implemented as a Netlify Function in `netlify/functions/create.mjs`, which Cloudflare Pages does not execute. The Cloudflare-hosted frontend can be deployed independently, but `/create` must be ported to Cloudflare Pages Functions or Workers before it will work on the Cloudflare URL. The Netlify endpoint remains separate.
