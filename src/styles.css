@@ -21,3 +21,19 @@
 :root[data-theme=dark] .primary:hover{background:#3887ff}
 :root[data-theme=dark] .help-card{background:linear-gradient(145deg,#12448c,#0c2a58)}
 .primary{box-shadow:none}.brand-icon{box-shadow:none}.help-card{background:linear-gradient(145deg,#1463e8,#0b4cae)}.help-card button{color:#1053bd}.quick-card,.nav-link,.primary,.secondary,.type-option{transition:background-color .16s,border-color .16s,color .16s,transform .16s}.quick-card:hover{transform:translateY(-1px)}.field input:focus,.field textarea:focus,.field select:focus,.search-box:focus-within{box-shadow:0 0 0 3px var(--ring)}.type-option.selected{box-shadow:inset 0 0 0 1px var(--purple)}
+
+/* Streamlined vertical studio flow */
+.studio-grid{display:flex;flex-direction:column;gap:22px;align-items:stretch}
+.studio-grid>.preview-column{order:0;position:static;width:100%}
+.studio-grid>.studio-controls{order:1;width:100%}
+.studio-grid>.studio-export{order:2;width:100%}
+.preview-stage{max-width:100%;padding:26px 14px}
+.preview-panel{display:flex;flex-direction:column;align-items:stretch}
+.preview-panel .preview-stage{width:100%}
+.studio-export .field{max-width:580px}
+.studio-export .download-grid{max-width:580px}
+.studio-export .save-button{max-width:580px}
+.quick-card strong,.quick-card>span,.quick-card>span svg{color:#101820!important}
+:root[data-theme=dark] .quick-card strong,:root[data-theme=dark] .quick-card>span,:root[data-theme=dark] .quick-card>span svg{color:#f6f8fc!important}
+#quick-start{scroll-margin-top:28px}
+@media(max-width:700px){.preview-stage{padding:22px 8px}.studio-grid{gap:16px}}
