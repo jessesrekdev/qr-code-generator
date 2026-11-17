@@ -76,6 +76,16 @@ Use a public, directly accessible HTTPS image URL; no upload or API key is neede
 https://open-qr-studio.pages.dev/create?q=https%3A%2F%2Fexample.com&format=svg&logo=https%3A%2F%2Fexample.com%2Flogo.png&logoSize=20
 ```
 
+**Working live demo — Python logo hosted on GitHub:**
+
+[Open the QR image with the centered Python logo](https://open-qr-studio.pages.dev/create?q=https%3A%2F%2Fmunox.org&format=svg&size=400&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fgithub%2Fexplore%2Fmain%2Ftopics%2Fpython%2Fpython.png&logoSize=20)
+
+```text
+https://open-qr-studio.pages.dev/create?q=https%3A%2F%2Fmunox.org&format=svg&size=400&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fgithub%2Fexplore%2Fmain%2Ftopics%2Fpython%2Fpython.png&logoSize=20
+```
+
+Direct logo URL: [Python PNG](https://raw.githubusercontent.com/github/explore/main/topics/python/python.png). The demo encodes `https://munox.org` and displays the logo at 20% of the QR width. Use `logo` or `image` for the URL and `logoSize` or `imageSize` for resizing. Both aliases behave identically.
+
 Replace the example image URL with an actual public image URL. PNG and JPG logos work with SVG, PNG and JPG QR output. WebP and GIF logos are currently supported only for SVG QR output on Cloudflare. SVG logos are not accepted. The image server must allow direct retrieval; private, inaccessible, redirected or oversized images are rejected. Avoid sensitive URLs and test scanning after adding a logo.
 
 ### Code examples
@@ -99,6 +109,8 @@ api.searchParams.set('q', 'https://example.com');
 api.searchParams.set('foreground', '#1463e8');
 api.searchParams.set('dots', 'rounded');
 api.searchParams.set('size', '400');
+api.searchParams.set('logo', 'https://raw.githubusercontent.com/github/explore/main/topics/python/python.png');
+api.searchParams.set('logoSize', '20');
 
 const qrImageUrl = api.toString();
 document.querySelector('#qr').src = qrImageUrl;
@@ -116,6 +128,8 @@ response = requests.get(url, params={
     'q': 'https://example.com',
     'foreground': '#1463e8',
     'size': 400,
+    'logo': 'https://raw.githubusercontent.com/github/explore/main/topics/python/python.png',
+    'logoSize': 20,
 })
 response.raise_for_status()
 
