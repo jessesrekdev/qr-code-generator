@@ -37,3 +37,9 @@
 :root[data-theme=dark] .quick-card strong,:root[data-theme=dark] .quick-card>span,:root[data-theme=dark] .quick-card>span svg{color:#f6f8fc!important}
 #quick-start{scroll-margin-top:28px}
 @media(max-width:700px){.preview-stage{padding:22px 8px}.studio-grid{gap:16px}}
+
+/* Raised dashboard statistics: restrained depth in both themes */
+.stats .stat{position:relative;background:var(--panel);border:1px solid var(--border);box-shadow:0 3px 5px rgba(15,42,80,.045),0 14px 30px rgba(15,42,80,.105);transition:transform .18s ease,box-shadow .18s ease;transform:translateY(-2px)}
+.stats .stat:hover{transform:translateY(-5px);box-shadow:0 7px 12px rgba(15,42,80,.07),0 19px 38px rgba(15,42,80,.14)}
+:root[data-theme=dark] .stats .stat{border-color:#293a51;box-shadow:0 4px 7px rgba(0,0,0,.22),0 16px 34px rgba(0,0,0,.35)}
+:root[data-theme=dark] .stats .stat:hover{box-shadow:0 8px 15px rgba(0,0,0,.3),0 22px 42px rgba(0,0,0,.45)}
