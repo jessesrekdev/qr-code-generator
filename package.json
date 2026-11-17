@@ -15,7 +15,8 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.0",
     "qrcode": "^1.5.4",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "jpeg-js": "^0.4.4"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
