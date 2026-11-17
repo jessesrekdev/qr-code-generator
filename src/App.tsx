@@ -128,7 +128,7 @@ function App(){
   reader.readAsDataURL(file);
  };
  const field=(label:string,key:string,placeholder:string,area=false)=><label className="field"><span>{label}</span>{area?<textarea value={fields[key]||''} placeholder={placeholder} onChange={e=>setField(key,e.target.value)} rows={4}/>:<input value={fields[key]||''} placeholder={placeholder} onChange={e=>setField(key,e.target.value)}/>}</label>;
- const editor=()=> <div className="studio-grid">{editingId&&<div className="editing-banner"><div><strong>Editing saved project</strong><span>{name}</span></div><button className="secondary" onClick={()=>navigate('/library')}>Back to library</button></div>}<div className="studio-controls">
+ const editor=()=> <div className="studio-grid"><div className="studio-controls">
  <section className="panel"><div className="section-title"><span className="step">01</span><div><h2>Choose your content</h2><p>Enter the information you want to share.</p></div></div>
 
  <div className="field-stack">{kind==='url'&&field('Website URL','url','https://yourwebsite.com')}{kind==='text'&&field('Your text','text','Enter your message',true)}
