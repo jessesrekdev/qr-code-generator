@@ -8,6 +8,9 @@ export default async (request)=>{
  if(request.method!=='GET'&&request.method!=='HEAD')return reply(405,'GET only',{'Content-Type':'text/plain; charset=utf-8','Allow':'GET, HEAD'});
  const params=new URL(request.url).searchParams;
  const q=params.get('q');
+ const requestedFormat=(params.get('format')||params.get('type')||(params.has('_png')?'png':params.has('_jpg')?'jpg':params.has('_svg')?'svg':'svg')).toLowerCase();
+ const format=requestedFormat==='jpeg'?'jpg':requestedFormat;
+ if(!['svg','png','jpg'].includes(format))return reply(400,'format must be svg, png, or jpg',{'Content-Type':'text/plain; charset=utf-8'});
  if(!q||!q.trim())return reply(400,'Missing required query parameter: q',{'Content-Type':'text/plain; charset=utf-8'});
  if(new TextEncoder().encode(q).length>2200)return reply(413,'QR content is too long',{'Content-Type':'text/plain; charset=utf-8'});
  const foreground=parseColor(params.get('foreground')||params.get('fg'),'#151a35');
@@ -30,7 +33,12 @@ export default async (request)=>{
   }
   const defs=gradient?'<defs><linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="'+xml(foreground)+'"/><stop offset="100%" stop-color="'+xml(second)+'"/></linearGradient></defs>':'';
   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" role="img" aria-label="QR code">'+defs+'<rect width="100%" height="100%" fill="'+xml(background)+'"/><g fill="'+(gradient?'url(#ink)':xml(foreground))+'">'+shapes.join('')+'</g></svg>';
-  return reply(200,request.method==='HEAD'?null:svg,{'Content-Type':'image/svg+xml; charset=utf-8','Content-Disposition':'inline; filename="open-qr.svg"'});
+  if(format==='svg')return reply(200,request.method==='HEAD'?null:svg,{'Content-Type':'image/svg+xml; charset=utf-8','Content-Disposition':'inline; filename="open-qr.svg"'});
+  // Convert the same styled SVG into a raster image, retaining the QR design.
+  const {default:sharp}=await import('sharp');
+  const raster=sharp(Buffer.from(svg));
+  const output=format==='png'?await raster.png().toBuffer():await raster.flatten({background}).jpeg({quality:92,chromaSubsampling:'4:4:4'}).toBuffer();
+  return reply(200,request.method==='HEAD'?null:output,{'Content-Type':format==='png'?'image/png':'image/jpeg','Content-Disposition':'inline; filename="open-qr.'+format+'"'});
  }catch(error){console.error('QR generation failed',error);return reply(400,'Unable to encode this QR content',{'Content-Type':'text/plain; charset=utf-8'})}
 };
 export const config={path:'/create'};
