@@ -2,9 +2,9 @@
 
 A modern, responsive QR code generator and public QR image API, built with React, TypeScript, Vite and Netlify Functions.
 
-**Live app:** https://open-qr-studio.netlify.app  
-**API documentation:** https://open-qr-studio.netlify.app/docs  
-**QR image endpoint:** https://open-qr-studio.netlify.app/create
+**Live app:** https://open-qr-studio.pages.dev  
+**API documentation:** https://open-qr-studio.pages.dev/docs  
+**QR image endpoint:** https://open-qr-studio.pages.dev/create
 
 ## Features
 
@@ -18,7 +18,7 @@ A modern, responsive QR code generator and public QR image API, built with React
 
 ## Use the web app
 
-Visit **https://open-qr-studio.netlify.app**, open **Studio**, choose a content type, enter the information to encode, customize your design, and download the QR code. Save projects in **Library** to edit them later. Saved projects stay in the current browser's local storage; they do not sync across devices.
+Visit **https://open-qr-studio.pages.dev**, open **Studio**, choose a content type, enter the information to encode, customize your design, and download the QR code. Save projects in **Library** to edit them later. Saved projects stay in the current browser's local storage; they do not sync across devices.
 
 ## QR image API
 
@@ -26,16 +26,16 @@ Send a GET request to `/create` with a required `q` query parameter. The respons
 
 ### Quick start
 
-[Generate a QR code for example.com](https://open-qr-studio.netlify.app/create?q=https%3A%2F%2Fexample.com)
+[Generate a QR code for example.com](https://open-qr-studio.pages.dev/create?q=https%3A%2F%2Fexample.com)
 
 ```text
-GET https://open-qr-studio.netlify.app/create?q=https%3A%2F%2Fexample.com
+GET https://open-qr-studio.pages.dev/create?q=https%3A%2F%2Fexample.com
 ```
 
 To customize its appearance:
 
 ```text
-https://open-qr-studio.netlify.app/create?q=Hello%20World&foreground=%231463e8&background=%23ffffff&dots=rounded&size=400&margin=4
+https://open-qr-studio.pages.dev/create?q=Hello%20World&foreground=%231463e8&background=%23ffffff&dots=rounded&size=400&margin=4
 ```
 
 **Important:** URL-encode the content in `q`. Encode the `#` in hex colors as `%23`; otherwise the browser treats it as a URL fragment and does not send it to the API. Separate parameters with `&` (not underscores).
@@ -59,9 +59,9 @@ Colors accept `#RGB` or `#RRGGBB`.
 ### Choose the image format
 
 ```text
-https://open-qr-studio.netlify.app/create?q=Hello&format=svg
-https://open-qr-studio.netlify.app/create?q=Hello&format=png
-https://open-qr-studio.netlify.app/create?q=Hello&format=jpg
+https://open-qr-studio.pages.dev/create?q=Hello&format=svg
+https://open-qr-studio.pages.dev/create?q=Hello&format=png
+https://open-qr-studio.pages.dev/create?q=Hello&format=jpg
 ```
 
 You can also append `&_png`, `&_jpg`, or `&_svg` to the URL. Without a format option, the API returns SVG. JPG uses an opaque background; PNG and SVG preserve the requested design.
@@ -72,7 +72,7 @@ You can also append `&_png`, `&_jpg`, or `&_svg` to the URL. Without a format op
 
 ```html
 <img
-  src="https://open-qr-studio.netlify.app/create?q=Hello%20World&size=320"
+  src="https://open-qr-studio.pages.dev/create?q=Hello%20World&size=320"
   alt="QR code for Hello World"
   width="320"
   height="320"
@@ -82,7 +82,7 @@ You can also append `&_png`, `&_jpg`, or `&_svg` to the URL. Without a format op
 **JavaScript — generate a URL with encoded parameters**
 
 ```js
-const api = new URL('https://open-qr-studio.netlify.app/create');
+const api = new URL('https://open-qr-studio.pages.dev/create');
 api.searchParams.set('q', 'https://example.com');
 api.searchParams.set('foreground', '#1463e8');
 api.searchParams.set('dots', 'rounded');
@@ -99,7 +99,7 @@ HTML element for the JavaScript example: `<img id="qr" alt="Generated QR code">`
 ```python
 import requests
 
-url = 'https://open-qr-studio.netlify.app/create'
+url = 'https://open-qr-studio.pages.dev/create'
 response = requests.get(url, params={
     'q': 'https://example.com',
     'foreground': '#1463e8',
@@ -114,7 +114,7 @@ with open('qr.svg', 'wb') as file:
 **cURL — download an SVG**
 
 ```bash
-curl --get 'https://open-qr-studio.netlify.app/create' \
+curl --get 'https://open-qr-studio.pages.dev/create' \
   --data-urlencode 'q=https://example.com' \
   --data-urlencode 'foreground=#1463e8' \
   --data-urlencode 'size=400' \
@@ -144,7 +144,7 @@ Build the React app:
 npm run build
 ```
 
-The frontend builds to `dist/`. The public `/create` endpoint is implemented in `netlify/functions/create.mjs` and requires a Netlify-compatible Functions runtime; serving `dist/` alone will **not** run the API. Netlify deployment configuration is in `netlify.toml`.
+The frontend builds to `dist/`. Cloudflare Pages serves the Vite frontend and runs the API via `functions/create.js`. The older Netlify implementation remains in `netlify/functions/create.mjs`. Serving `dist/` alone will **not** run either server-side API.
 
 ## Security and privacy
 
@@ -154,7 +154,7 @@ Studio QR generation runs in the browser. Library designs are stored in `localSt
 
 ## Tech stack
 
-React 19 · TypeScript · Vite · React Router · Lucide React · qr-code-styling · qrcode · Netlify Functions
+React 19 · TypeScript · Vite · React Router · Lucide React · qr-code-styling · qrcode · Cloudflare Pages Functions · Netlify Functions
 
 ## Cloudflare Pages deployment
 
@@ -166,4 +166,4 @@ Cloudflare Pages project: https://open-qr-studio.pages.dev
 - Build output: `dist`
 - Git pushes to the production branch trigger builds.
 
-**API migration note:** The existing `/create` endpoint is implemented as a Netlify Function in `netlify/functions/create.mjs`, which Cloudflare Pages does not execute. The Cloudflare-hosted frontend can be deployed independently, but `/create` must be ported to Cloudflare Pages Functions or Workers before it will work on the Cloudflare URL. The Netlify endpoint remains separate.
+**Cloudflare API:** `/create` is implemented as a Cloudflare Pages Function in `functions/create.js` and supports SVG, PNG and JPG. The older Netlify endpoint is a separate deployment.
