@@ -1,4 +1,4 @@
-# Jesse QR Studio
+# Open QR Studio
 
 A modern, responsive QR code generator built with React, TypeScript and Vite. Upgraded from the original 2024 static HTML project.
 
