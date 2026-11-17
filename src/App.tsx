@@ -4,22 +4,22 @@ import QRCodeStyling from 'qr-code-styling';
 import {LayoutDashboard,ScanLine,FolderHeart,Info,Sun,Moon,Plus,Download,Save,Trash2,ArrowRight,Link2,Wifi,Mail,Phone,MessageSquare,UserRound,Type,Palette,ImagePlus,Check,Search,Menu,X,Copy,RefreshCw,Send,BookOpen,Code2,ExternalLink} from 'lucide-react';
 
 type Kind='url'|'text'|'wifi'|'email'|'phone'|'sms'|'contact';
-type Style={foreground:string;background:string,dots:'square'|'rounded'|'dots'|'classy'|'extra-rounded',corners:'square'|'dot'|'extra-rounded',gradient:boolean,second:string,logo:string};
+type Style={foreground:string;background:string,dots:'square'|'rounded'|'dots'|'classy'|'extra-rounded',corners:'square'|'dot'|'extra-rounded',gradient:boolean,second:string,logo:string;logoSize?:number};
 type RecordItem={id:string;name:string;kind:Kind;data:string;style:Style;created:number;fields?:Record<string,string>;updated?:number};
-const defaults:Style={foreground:'#151a35',background:'#ffffff',dots:'rounded',corners:'extra-rounded',gradient:false,second:'#1463e8',logo:''};
+const defaults:Style={foreground:'#151a35',background:'#ffffff',dots:'rounded',corners:'extra-rounded',gradient:false,second:'#1463e8',logo:'',logoSize:25};
 const kindLabels:Record<Kind,string>={url:'Website URL',text:'Plain text',wifi:'Wi-Fi',email:'Email',phone:'Phone',sms:'SMS',contact:'Contact card'};
 const types:{id:Kind;icon:typeof Link2}[]=[{id:'url',icon:Link2},{id:'text',icon:Type},{id:'wifi',icon:Wifi},{id:'email',icon:Mail},{id:'phone',icon:Phone},{id:'sms',icon:MessageSquare},{id:'contact',icon:UserRound}];
 const readSaved=():RecordItem[]=>{try{const raw=JSON.parse(localStorage.getItem('jesse-qr-library')||'[]');return Array.isArray(raw)?raw:[]}catch{return []}};
 const escapeWifi=(s:string)=>s.replace(/([\\;,:"'])/g,'\\$1');
 function Preview({data,style,size=300}:{data:string;style:Style;size?:number}){
  const host=useRef<HTMLDivElement>(null);const qr=useRef<QRCodeStyling|null>(null);
- const options=useMemo(()=>({width:size,height:size,type:'svg' as const,data:data||' ',margin:12,image:style.logo||undefined,qrOptions:{errorCorrectionLevel:'H' as const},imageOptions:{hideBackgroundDots:true,imageSize:.25,margin:6,crossOrigin:'anonymous' as const},dotsOptions:{type:style.dots,color:style.foreground,...(style.gradient?{gradient:{type:'linear' as const,rotation:0,colorStops:[{offset:0,color:style.foreground},{offset:1,color:style.second}]}}:{})},cornersSquareOptions:{type:style.corners,color:style.foreground},backgroundOptions:{color:style.background}}),[data,style,size]);
+ const options=useMemo(()=>({width:size,height:size,type:'svg' as const,data:data||' ',margin:12,image:style.logo||undefined,qrOptions:{errorCorrectionLevel:'H' as const},imageOptions:{hideBackgroundDots:true,imageSize:(style.logoSize??25)/100,margin:6,crossOrigin:'anonymous' as const},dotsOptions:{type:style.dots,color:style.foreground,...(style.gradient?{gradient:{type:'linear' as const,rotation:0,colorStops:[{offset:0,color:style.foreground},{offset:1,color:style.second}]}}:{})},cornersSquareOptions:{type:style.corners,color:style.foreground},backgroundOptions:{color:style.background}}),[data,style,size]);
  useEffect(()=>{if(!host.current)return;host.current.innerHTML='';qr.current=new QRCodeStyling(options);qr.current.append(host.current);return()=>{if(host.current)host.current.innerHTML=''}},[options]);
  return <div className="qr-render" ref={host} aria-label="QR code preview" role="img"/>;
 }
 async function downloadQR(data:string,style:Style,extension:'png'|'svg'|'jpeg'|'webp'){
  if(!data.trim())throw new Error('Enter QR code content first');
- const qr=new QRCodeStyling({width:1200,height:1200,type:extension==='svg'?'svg':'canvas',data,margin:48,image:style.logo||undefined,qrOptions:{errorCorrectionLevel:'H'},imageOptions:{imageSize:.25,margin:16,hideBackgroundDots:true,crossOrigin:'anonymous'},dotsOptions:{type:style.dots,color:style.foreground,...(style.gradient?{gradient:{type:'linear',rotation:0,colorStops:[{offset:0,color:style.foreground},{offset:1,color:style.second}]}}:{})},cornersSquareOptions:{type:style.corners,color:style.foreground},backgroundOptions:{color:style.background}});
+ const qr=new QRCodeStyling({width:1200,height:1200,type:extension==='svg'?'svg':'canvas',data,margin:48,image:style.logo||undefined,qrOptions:{errorCorrectionLevel:'H'},imageOptions:{imageSize:(style.logoSize??25)/100,margin:16,hideBackgroundDots:true,crossOrigin:'anonymous'},dotsOptions:{type:style.dots,color:style.foreground,...(style.gradient?{gradient:{type:'linear',rotation:0,colorStops:[{offset:0,color:style.foreground},{offset:1,color:style.second}]}}:{})},cornersSquareOptions:{type:style.corners,color:style.foreground},backgroundOptions:{color:style.background}});
  // Generate the actual file first rather than calling the library's browser download helper.
  const raw=await qr.getRawData(extension);
  if(!raw)throw new Error('QR export could not be generated');
@@ -99,6 +99,11 @@ function App(){
     canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
     const ctx=canvas.getContext('2d');
     if(!ctx)return flash('Could not process the logo');
+    // Round JPEG corners on a transparent PNG canvas before embedding.
+    if(file.type==='image/jpeg'||/\.jpe?g$/i.test(file.name)){
+     const radius=Math.min(canvas.width,canvas.height)*.14;
+     ctx.beginPath();ctx.roundRect(0,0,canvas.width,canvas.height,radius);ctx.clip();
+    }
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
     try{setStyle(p=>({...p,logo:canvas.toDataURL('image/png')}));flash('Center logo added')}
     catch{flash('Could not process the logo. Try a PNG image.')}
@@ -122,7 +127,7 @@ function App(){
  <label className="checkline"><input type="checkbox" checked={style.gradient} onChange={e=>setStyle(p=>({...p,gradient:e.target.checked}))}/>Use a gradient</label>{style.gradient&&<label className="field"><span>Second gradient color</span><div className="color-input"><input type="color" value={style.second} onChange={e=>setStyle(p=>({...p,second:e.target.value}))}/><code>{style.second}</code></div></label>}
  <label className="field"><span>Dot pattern</span><select value={style.dots} onChange={e=>setStyle(p=>({...p,dots:e.target.value as Style['dots']}))}><option value="square">Square</option><option value="rounded">Rounded</option><option value="dots">Dots</option><option value="classy">Classy</option><option value="extra-rounded">Extra rounded</option></select></label>
  <label className="field"><span>Corner shape</span><select value={style.corners} onChange={e=>setStyle(p=>({...p,corners:e.target.value as Style['corners']}))}><option value="square">Square</option><option value="dot">Dot</option><option value="extra-rounded">Extra rounded</option></select></label>
- <div className="field"><span>Center logo</span><label className="upload"><ImagePlus size={18}/> Upload an image<input type="file" accept="image/*" hidden onChange={e=>upload(e.target.files?.[0])}/></label>{style.logo&&<button className="text-button" onClick={()=>setStyle(p=>({...p,logo:''}))}>Remove logo</button>}</div>
+ <div className="field"><span>Center logo</span><label className="upload"><ImagePlus size={18}/> Upload an image<input type="file" accept="image/*" hidden onChange={e=>upload(e.target.files?.[0])}/></label>{style.logo&&<><label className="field"><span>Logo size: {style.logoSize??25}%</span><input type="range" min="10" max="35" step="1" value={style.logoSize??25} onChange={e=>setStyle(p=>({...p,logoSize:Number(e.target.value)}))}/></label><button className="text-button" onClick={()=>setStyle(p=>({...p,logo:''}))}>Remove logo</button></>}</div>
  <button className="text-button" onClick={()=>setStyle(defaults)}><RefreshCw size={15}/> Reset appearance</button></section></div>
  <aside className="preview-column"><section className="panel preview-panel"><div className="preview-top"><div><h2>Live preview</h2><p>Updates as you customize</p></div><span className="live"><span/> Live</span></div><div className="preview-stage"><div className="qr-paper"><Preview data={data} style={style}/></div></div><p className="scan-tip">Keep good contrast and test your QR code before sharing.</p></section></aside><section className="panel studio-export"><h2>{editingId?'Update & download':'Save & download'}</h2><p>Give your design a name, then download or save it.</p><label className="field"><span>Design name</span><input value={name} onChange={e=>setName(e.target.value)} placeholder="My QR code"/></label><div className="download-grid"><button disabled={!valid} className="primary" onClick={()=>void exportFile(data,style,'png')}><Download size={17}/> Download PNG</button><button disabled={!valid} className="secondary" onClick={()=>void exportFile(data,style,'svg')}>Export SVG</button></div><button disabled={!valid} className="save-button" onClick={save}><Save size={17}/> {editingId?'Save changes':'Save to library'}</button></section></div>;
  const apiBase=typeof window!=='undefined'?window.location.origin+'/create':'/create';
